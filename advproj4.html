@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Whack-a-Mole</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #8bc34a;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .game-title {
+            color: #33691e;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .game-info {
+            background-color: #dcedc8;
+            border-radius: 10px;
+            padding: 15px 25px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            min-width: 400px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .info-label {
+            font-size: 0.9rem;
+            color: #33691e;
+            margin-bottom: 5px;
+        }
+        
+        .info-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #33691e;
+        }
+        
+        .game-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .hole {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            background-color: #5d4037;
+            border-radius: 50%;
+            overflow: hidden;
+            box-shadow: inset 0 10px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .mole {
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: auto;
+            transition: top 0.3s;
+            cursor: pointer;
+        }
+        
+        .mole.active {
+            top: 10%;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        button {
+            padding: 12px 20px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+            background-color: #4caf50;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        button:hover {
+            background-color: #388e3c;
+        }
+        
+        button:disabled {
+            background-color: #a5d6a7;
+            cursor: not-allowed;
+        }
+        
+        .difficulty-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .difficulty-btn {
+            padding: 8px 15px;
+            font-size: 0.9rem;
+            border: 2px solid #4caf50;
+            border-radius: 5px;
+            background-color: white;
+            color: #4caf50;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .difficulty-btn.active {
+            background-color: #4caf50;
+            color: white;
+        }
+        
+        .game-over {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+        
+        .game-over-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            max-width: 400px;
+        }
+        
+        .game-over-title {
+            font-size: 2rem;
+            color: #33691e;
+            margin-bottom: 15px;
+        }
+        
+        .final-score {
+            font-size: 3rem;
+            color: #4caf50;
+            margin-bottom: 20px;
+        }
+        
+        .play-again-btn {
+            padding: 12px 25px;
+            font-size: 1.1rem;
+            margin-top: 10px;
+        }
+        
+        @media (max-width: 600px) {
+            .game-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .hole {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .game-info {
+                min-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1 class="game-title">Whack-a-Mole!</h1>
+    
+    <div class="game-info">
+        <div class="info-item">
+            <div class="info-label">Score</div>
+            <div class="info-value" id="score">0</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Time</div>
+            <div class="info-value" id="time">30</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">High Score</div>
+            <div class="info-value" id="high-score">0</div>
+        </div>
+    </div>
+    
+    <div class="difficulty-controls">
+        <button class="difficulty-btn active" data-difficulty="easy">Easy</button>
+        <button class="difficulty-btn" data-difficulty="medium">Medium</button>
+        <button class="difficulty-btn" data-difficulty="hard">Hard</button>
+    </div>
+    
+    <div class="game-container" id="game-container">
+        <div class="hole">
+            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTIwIj48ZWxsaXBzZSBjeD0iNTAiIGN5PSI0MCIgcng9IjMwIiByeT0iMjAiIGZpbGw9IiM4YjRjMjkiLz48ZWxsaXBzZSBjeD0iNTAiIGN5PSI4MCIgcng9IjQwIiByeT0iNDAiIGZpbGw9IiM4YjRjMjkiLz48Y2lyY2xlIGN4PSIzNSIgY3k9IjM1IiByPSI1IiBmaWxsPSIjMDAwIi8+PGNpcmNsZSBjeD0iNjUiIGN5PSIzNSIgcj0iNSIgZmlsbD0iIzAwMCIvPjxlbGxpcHNlIGN4PSI1MCIgY3k9IjUwIiByeD0iMTAiIHJ5PSI1IiBmaWxsPSIjZmZjMGNiIi8+PGVsbGlwc2UgY3g9IjUwIiBjeT0iNjUiIHJ4PSIxNSIgcnk9IjUiIGZpbGw9IiNmZmMwY2IiLz48cGF0aCBkPSJNMjUgMzAgQzIyIDIwIDI1IDE1IDMwIDEwIFExNSAxNSAxNSAyNSBRMTUgMzUgMjUgMzBaIiBmaWxsPSIjOGI0YzI5Ii8+PHBhdGggZD0iTTc1IDMwIEM3OCAyMCA3NSAxNSA3MCAxMCBRODUgMTUgODUgMjUgUTg1IDM1IDc1IDMwWiIgZmlsbD0iIzhiNGMyOSIvPjwvc3ZnPg==" class="mole">
+        </div>
+        <div class="hole">
+            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTIwIj48ZWxsaXBzZSBjeD0iNTAiIGN5PSI0MCIgcng9IjMwIiByeT0iMjAiIGZpbGw9IiM4YjRjMjkiLz48ZWxsaXBzZSBjeD0iNTAiIGN5PSI4MCIgcng9IjQwIiByeT0iNDAiIGZpbGw9IiM4YjRjMjkiLz48Y2lyY2xlIGN4PSIzNSIgY3k9IjM1IiByPSI1IiBmaWxsPSIjMDAwIi8+PGNpcmNsZSBjeD0iNjUiIGN5PSIzNSIgcj0iNSIgZmlsbD0iIzAwMCIvPjxlbGxpcHNlIGN4PSI1MCIgY3k9IjUwIiByeD0iMTAiIHJ5PSI1IiBmaWxsPSIjZmZjMGNiIi8+PGVsbGlwc2UgY3g9IjUwIiBjeT0iNjUiIHJ4PSIxNSIgcnk9IjUiIGZpbGw9IiNmZmMwY2IiLz48cGF0aCBkPSJNMjUgMzAgQzIyIDIwIDI1IDE1IDMwIDEwIFExNSAxNSAxNSAyNSBRMTUgMzUgMjUgMzBaIiBmaWxsPSIjOGI0YzI5Ii8+PHBhdGggZD0iTTc1IDMwIEM3OCAyMCA3NSAxNSA3MCAxMCBRODUgMTUgODUgMjUgUTg1IDM1IDc1IDMwWiIgZmlsbD0iIzhiNGMyOSIvPjwvc3ZnPg==" class="mole">
+        </div>
+        <div class="hole">
+            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTIwIj48ZWxsaXBzZSBjeD0iNTAiIGN5PSI0MCIgcng9IjMwIiByeT0iMjAiIGZpbGw9IiM4YjRjMjkiLz48ZWxsaXBzZSBjeD0iNTAiIGN5PSI4MCIgcng9IjQwIiByeT0iNDAiIGZpbGw9IiM4YjRjMjkiLz48Y2lyY2xlIGN4PSIzNSIgY3k9IjM1IiByPSI1IiBmaWxsPSIjMDAwIi8+PGNpcmNsZSBjeD0iNjUiIGN5PSIzNSIgcj0iNSIgZmlsbD0iIzAwMCIvPjxlbGxpcHNlIGN4PSI1MCIgY3k9IjUwIiByeD0iMTAiIHJ5PSI1IiBmaWxsPSIjZmZjMGNiIi8+PGVsbGlwc2UgY3g9IjUwIiBjeT0iNjUiIHJ4PSIxNSIgcnk9IjUiIGZpbGw9IiNmZmMwY2IiLz48cGF0aCBkPSJNMjUgMzAgQzIyIDIwIDI1IDE1IDMwIDEwIFExNSAxNSAxNSAyNSBRMTUgMzUgMjUgMzBaIiBmaWxsPSIjOGI0YzI5Ii8+PHBhdGggZD0iTTc1IDMwIEM3OCAyMCA3NSAxNSA3MCAxMCBRODUgMTUgODUgMjUgUTg1IDM1IDc1IDMwWiIgZmlsbD0iIzhiNGMyOSIvPjwvc3ZnPg==" class="mole">
+        </div>
+        <div class="hole">
+            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTIwIj48ZWxsaXBzZSBjeD0iNTAiIGN5PSI0MCIgcng9IjMwIiByeT0iMjAiIGZpbGw9IiM4YjRjMjkiLz48ZWxsaXBzZSBjeD0iNTAiIGN5PSI4MCIgcng9IjQwIiByeT0iNDAiIGZpbGw9IiM4YjRjMjkiLz48Y2lyY2xlIGN4PSIzNSIgY3k9IjM1IiByPSI1IiBmaWxsPSIjMDAwIi8+PGNpcmNsZSBjeD0iNjUiIGN5PSIzNSIgcj0iNSIgZmlsbD0iIzAwMCIvPjxlbGxpcHNlIGN4PSI1MCIgY3k9IjUwIiByeD0iMTAiIHJ5PSI1IiBmaWxsPSIjZmZjMGNiIi8+PGVsbGlwc2UgY3g9IjUwIiBjeT0iNjUiIHJ4PSIxNSIgcnk9IjUiIGZpbGw9IiNmZmMwY2IiLz48cGF0aCBkPSJNMjUgMzAgQzIyIDIwIDI1IDE1IDMwIDEwIFExNSAxNSAxNSAyNSBRMTUgMzUgMjUgMzBaIiBmaWxsPSIjOGI0YzI5Ii8+PHBhdGggZD0iTTc1IDMwIEM3OCAyMCA3NSAxNSA3MCAxMCBRODUgMTUgODUgMjUgUTg1IDM1IDc1IDMwWiIgZmlsbD0iIzhiNGMyOSIvPjwvc3ZnPg==" class="mole">
+        </div>
+        <div class="hole">
+            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTIwIj48ZWxsaXBzZSBjeD0iNTAiIGN5PSI0MCIgcng9IjMwIiByeT0iMjAiIGZpbGw9IiM4YjRjMjkiLz48ZWxsaXBzZSBjeD0iNTAiIGN5PSI4MCIgcng9IjQwIiByeT0iNDAiIGZpbGw9IiM4YjRjMjkiLz48Y2lyY2xlIGN4PSIzNSIgY3k9IjM1IiByPSI1IiBmaWxsPSIjMDAwIi8+PGNpcmNsZSBjeD0iNjUiIGN5PSIzNSIgcj0iNSIgZmlsbD0iIzAwMCIvPjxlbGxpcHNlIGN4PSI1MCIgY3k9IjUwIiByeD0iMTAiIHJ5PSI1IiBmaWxsPSIjZmZjMGNiIi8+PGVsbGlwc2UgY3g9IjUwIiBjeT0iNjUiIHJ4PSIxNSIgcnk9IjUiIGZpbGw9IiNmZmMwY2IiLz48cGF0aCBkPSJNMjUgMzAgQzIyIDIwIDI1IDE1IDMwIDEwIFExNSAxNSAxNSAyNSBRMTUgMzUgMjUgMzBaIiBmaWxsPSIjOGI0YzI5Ii8+PHBhdGggZD0iTTc1IDMwIEM3OCAyMCA3NSAxNSA3MCAxMCBRODUgMTUgODUgMjUgUTg1IDM1IDc1IDMwWiIgZmlsbD0iIzhiNGMyOSIvPjwvc3ZnPg==" class="mole">
+        </div>
+        <div class="hole">
+            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTIwIj48ZWxsaXBzZSBjeD0iNTAiIGN5PSI0MCIgcng9IjMwIiByeT0iMjAiIGZpbGw9IiM4YjRjMjkiLz48ZWxsaXBzZSBjeD0iNTAiIGN5PSI4MCIgcng9IjQwIiByeT0iNDAiIGZpbGw9IiM4YjRjMjkiLz48Y2lyY2xlIGN4PSIzNSIgY3k9IjM1IiByPSI1IiBmaWxsPSIjMDAwIi8+PGNpcmNsZSBjeD0iNjUiIGN5PSIzNSIgcj0iNSIgZmlsbD0iIzAwMCIvPjxlbGxpcHNlIGN4PSI1MCIgY3k9IjUwIiByeD0iMTAiIHJ5PSI1IiBmaWxsPSIjZmZjMGNiIi8+PGVsbGlwc2UgY3g9IjUwIiBjeT0iNjUiIHJ4PSIxNSIgcnk9IjUiIGZpbGw9IiNmZmMwY2IiLz48cGF0aCBkPSJNMjUgMzAgQzIyIDIwIDI1IDE1IDMwIDEwIFExNSAxNSAxNSAyNSBRMTUgMzUgMjUgMzBaIiBmaWxsPSIjOGI0YzI5Ii8+PHBhdGggZD0iTTc1IDMwIEM3OCAyMCA3NSAxNSA3MCAxMCBRODUgMTUgODUgMjUgUTg1IDM1IDc1IDMwWiIgZmlsbD0iIzhiNGMyOSIvPjwvc3ZnPg==" class="mole">
+        </div>
+    </div>
+    
+    <div class="controls">
+        <button id="start-button">Start Game</button>
+    </div>
+    
+    <div class="game-over" id="game-over">
+        <div class="game-over-content">
+            <h2 class="game-over-title">Game Over!</h2>
+            <p>Your score:</p>
+            <div class="final-score" id="final-score">0</div>
+            <button class="play-again-btn" id="play-again-btn">Play Again</button>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Game elements
+            const holes = document.querySelectorAll('.hole');
+            const moles = document.querySelectorAll('.mole');
+            const scoreDisplay = document.getElementById('score');
+            const timeDisplay = document.getElementById('time');
+            const highScoreDisplay = document.getElementById('high-score');
+            const startButton = document.getElementById('start-button');
+            const difficultyButtons = document.querySelectorAll('.difficulty-btn');
+            const gameOverScreen = document.getElementById('game-over');
+            const finalScoreDisplay = document.getElementById('final-score');
+            const playAgainButton = document.getElementById('play-again-btn');
+            
+            // Game variables
+            let score = 0;
+            let timeLeft = 30;
+            let gameTimer;
+            let moleTimer;
+            let isGameRunning = false;
+            let lastHole;
+            
+            // Difficulty settings
+            const difficulties = {
+                easy: {
+                    minTime: 1000,
+                    maxTime: 2000,
+                    gameTime: 30
+                },
+                medium: {
+                    minTime: 700,
+                    maxTime: 1500,
+                    gameTime: 25
+                },
+                hard: {
+                    minTime: 500,
+                    maxTime: 1200,
+                    gameTime: 20
+                }
+            };
+            
+            let currentDifficulty = 'easy';
+            
+            // Load high score from local storage
+            const highScore = localStorage.getItem('whackAMoleHighScore') || 0;
+            highScoreDisplay.textContent = highScore;
+            
+            // Start the game
+            function startGame() {
+                // Reset game state
+                score = 0;
+                scoreDisplay.textContent = score;
+                
+                // Set time based on difficulty
+                timeLeft = difficulties[currentDifficulty].gameTime;
+                timeDisplay.textContent = timeLeft;
+                
+                // Update UI
+                startButton.disabled = true;
+                difficultyButtons.forEach(btn => btn.disabled = true);
+                isGameRunning = true;
+                
+                // Start the timers
+                gameTimer = setInterval(updateTimer, 1000);
+                
+                // Start showing moles
+                showMole();
+            }
+            
+            // Update timer
+            function updateTimer() {
+                timeLeft--;
+                timeDisplay.textContent = timeLeft;
+                
+                if (timeLeft <= 0) {
+                    endGame();
+                }
+            }
+            
+            // End the game
+            function endGame() {
+                clearInterval(gameTimer);
+                clearTimeout(moleTimer);
+                isGameRunning = false;
+                
+                // Hide any visible moles
+                moles.forEach(mole => mole.classList.remove('active'));
+                
+                // Update UI
+                startButton.disabled = false;
+                difficultyButtons.forEach(btn => btn.disabled = false);
+                
+                // Check for high score
+                if (score > highScore) {
+                    localStorage.setItem('whackAMoleHighScore', score);
+                    highScoreDisplay.textContent = score;
+                }
+                
+                // Show game over screen
+                finalScoreDisplay.textContent = score;
+                gameOverScreen.style.display = 'flex';
+            }
+            
+            // Select a random hole
+            function randomHole() {
+                const index = Math.floor(Math.random() * holes.length);
+                const hole = holes[index];
+                
+                // Avoid showing the same hole twice in a row
+                if (hole === lastHole) {
+                    return randomHole();
+                }
+                
+                lastHole = hole;
+                return hole;
+            }
+            
+            // Show a mole
+            function showMole() {
+                if (!isGameRunning) return;
+                
+                // Get random time based on difficulty
+                const time = randomTime(
+                    difficulties[currentDifficulty].minTime, 
+                    difficulties[currentDifficulty].maxTime
+                );
+                
+                // Get random hole
+                const hole = randomHole();
+                
+                // Show the mole
+                hole.querySelector('.mole').classList.add('active');
+                
+                // Hide the mole after the time
+                moleTimer = setTimeout(() => {
+                    hole.querySelector('.mole').classList.remove('active');
+                    if (isGameRunning) showMole();
+                }, time);
+            }
+            
+            // Get random time
+            function randomTime(min, max) {
+                return Math.round(Math.random() * (max - min) + min);
+            }
+            
+            // Whack a mole
+            function whack(e) {
+                if (!isGameRunning) return;
+                
+                // Check if the mole is active
+                if (this.classList.contains('active')) {
+                    this.classList.remove('active');
+                    score++;
+                    scoreDisplay.textContent = score;
+                    
+                    // Add a small animation
+                    this.style.transform = 'translateX(-50%) scale(0.9)';
+                    setTimeout(() => {
+                        this.style.transform = 'translateX(-50%)';
+                    }, 100);
+                }
+            }
+            
+            // Set difficulty
+            function setDifficulty(e) {
+                const difficulty = e.target.getAttribute('data-difficulty');
+                currentDifficulty = difficulty;
+                
+                // Update UI
+                difficultyButtons.forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                e.target.classList.add('active');
+                
+                // Update time display
+                timeLeft = difficulties[currentDifficulty].gameTime;
+                timeDisplay.textContent = timeLeft;
+            }
+            
+            // Event listeners
+            startButton.addEventListener('click', startGame);
+            moles.forEach(mole => mole.addEventListener('click', whack));
+            difficultyButtons.forEach(btn => btn.addEventListener('click', setDifficulty));
+            playAgainButton.addEventListener('click', () => {
+                gameOverScreen.style.display = 'none';
+                startGame();
+            });
+        });
+    </script>
+</body>
+</html>
