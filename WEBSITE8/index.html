@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Country Guide App</title>
+    <!--Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="search-bar">
+        <input
+          type="text"
+          id="country-input"
+          placeholder="Enter a country name here..."
+        />
+        <button id="reset-btn">Reset</button>
+        <button id="search-btn">Search</button>
+      </div>
+      <div id="result"></div>
+    </div>
+    <!-- Script -->
+    <script src="script.js"></script>
+  </body>
+</html>
+
+<style>
+    * {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    font-family: "Poppins", sans-serif;
+  }
+  body {
+    background: url("https://c4.wallpaperflare.com/wallpaper/649/274/476/countries-flag-map-world-map-wallpaper-preview.jpg");
+    background-size:95%;
+  background-position:top;
+  /* height: 100%;
+  width: 100%; */
+  }
+  .container {
+    background-color:transparent;
+    backdrop-filter: blur(10px);
+    border-radius: 1vw;
+    width: 80vw;
+    max-width: 37.5rem;
+    padding: 3rem 2.5rem;
+    position: absolute;
+    transform: translate(-50%, -50%);
+    top: 50%;
+    left: 50%;
+    box-shadow: 0 0.50rem 0.50rem 0.50rem rgba(247, 246, 246, 0.25);
+    /* border: #e5e5e7; */
+  }
+
+  .search-bar {
+    display: grid;
+    grid-template-columns: 9fr 3fr;
+    gap: 1.25rem;
+  }
+  .search-bar button {
+    font-size: 1rem;
+    background-color: #3d64e6;
+    color: #ffffff;
+    padding: 0.5rem 0;
+    border: none;
+    border-radius: 1.5rem;
+    cursor: pointer;
+  }
+  .search-bar input {
+    font-size: 1rem;
+    padding: 0 0.62rem;
+    border: none;
+    border-bottom: 2px solid #3d64e6;
+    outline: none;
+    color: #222a43;
+  }
+  #result {
+    margin-top: 1.20em;
+  }
+  .container .flag-img {
+    display: block;
+    width: 45%;
+    min-width: 7.5em;
+    margin: 1.8em auto 1.2em auto;
+  }
+  .container h2 {
+    font-weight: 600;
+    color: #ffffff;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 1.8em;
+  }
+  .wrapper{
+    display: flex;
+    justify-content: center;
+  }
+  .data-wrapper {
+    margin-bottom: 1em;
+    letter-spacing: 0.3px;
+  }
+  .container h4 {
+    display: inline;
+    font-weight: 500;
+    color: #ffffff;
+  }
+  .container span {
+    color: #d0d0d0;
+  }
+  .container h3 {
+    text-align: center;
+    font-size: 1.7em;
+    font-weight: 500;
+    color: #f83044;
+  }
+</style>
+
+<script>
+    //HTML Elements.
+let searchBtn = document.getElementById('search-btn');
+let countryInp = document.getElementById('country-input');
+let resetBtn = document.getElementById('reset-btn');
+let result = document.getElementById('result');
+
+//This event listener is triggered when the search button (searchBtn) is clicked.
+searchBtn.addEventListener('click',()=>{
+
+    let countryName = countryInp.value;
+    let finalURL = `https://restcountries.com/v3.1/name/${countryName}?fullText=true`;
+
+    fetch(finalURL)
+        .then((response) => {
+            return response.json();
+        })
+        .then((data) => {
+            result.innerHTML = `
+            <img src="${data[0].flags.svg}" class="flag-img">
+                <h2>${data[0].name.common}</h2>
+                <div class="wrapper">
+                    <div class="data-wrapper">
+                        <h4>Capital: </h4>
+                        <span>${data[0].capital[0]}</span>
+                    </div>
+                </div>
+                <div class="wrapper">
+                    <div class="data-wrapper">
+                        <h4>Continent: </h4>
+                        <span>${data[0].continents[0]}</span>
+                    </div>
+                </div>
+                <div class="wrapper">
+                    <div class="data-wrapper">
+                        <h4>Population:</h4>
+                        <span>${data[0].population}</span>
+                    </div>
+                </div>
+                <div class="wrapper">
+                    <div class="data-wrapper">
+                        <h4>Currency:</h4>
+                        <span>${data[0].currencies[Object.keys(data[0].currencies)].name} - ${Object.keys(data[0].currencies)[0]}</span>
+                    </div>
+                </div>
+                <div class="wrapper">
+                    <div class="data-wrapper">
+                        <h4>Common Languages:</h4>
+                        <span>${Object.values(data[0].languages).toString().split(",").join(", ")}</span>
+                    </div>
+                </div>
+            `;
+        })
+        .catch(() => {
+    // Display the error message
+    if (countryName.length == "") {
+        result.innerHTML = `<h3>The input field cannot be empty</h3>`;
+    } else {
+        result.innerHTML = `<h3>Please enter a valid country name</h3>`;
+    }
+
+    // Clear the error message after 2-3 seconds
+    setTimeout(() => {
+        result.innerHTML = '';
+    }, 3000); // Adjust the timeout duration based on your preference
+});
+  
+})
+
+<!-- //This event listener is triggered when the reset button (resetBtn) is clicked -->
+resetBtn.addEventListener('click', () => {
+    location.reload();
+});
+</script>
