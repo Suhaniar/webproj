@@ -1,0 +1,241 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Chatbot</title>
+    <link rel="stylesheet" href="style.css">
+    <script defer src="script.js"></script>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">AI Chatbot</div>
+        <div class="chat-box" id="chat-box"></div>
+        <div class="chat-input">
+            <input type="text" id="user-input" placeholder="Type a message...">
+            <button id="send-btn">Send</button>
+            <button id="voice-btn">🎤</button>
+        </div>
+    </div>
+</body>
+</html>
+
+
+<style>
+/* General Styling */
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: linear-gradient(135deg, #3a1c71, #d76d77, #ffaf7b);
+    font-family: "Poppins", sans-serif;
+    overflow: hidden;
+}
+
+/* 3D Chat Container */
+.chat-container {
+    width: 400px;
+    height: 550px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.3), -10px -10px 30px rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transform: perspective(1000px) rotateX(5deg);
+    transition: transform 0.3s ease-in-out;
+}
+
+/* Header */
+.chat-header {
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 15px;
+    text-align: center;
+    font-size: 20px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Chat Messages */
+.chat-box {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Scrollbar */
+.chat-box::-webkit-scrollbar {
+    width: 6px;
+}
+
+.chat-box::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 10px;
+}
+
+/* Messages */
+.user-message, .bot-message {
+    max-width: 80%;
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 14px;
+    position: relative;
+    opacity: 0;
+    animation: fadeIn 0.3s forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* User Message */
+.user-message {
+    align-self: flex-end;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    text-align: right;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Bot Message */
+.bot-message {
+    align-self: flex-start;
+    background: linear-gradient(135deg, #ff758c, #ff7eb3);
+    color: white;
+    text-align: left;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Typing Animation */
+.typing {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    background: white;
+    border-radius: 50%;
+    animation: typing 1s infinite;
+}
+
+@keyframes typing {
+    0% { opacity: 0.3; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.2); }
+    100% { opacity: 0.3; transform: scale(1); }
+}
+
+/* Chat Input */
+.chat-input {
+    display: flex;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.2);
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(10px);
+}
+
+/* Input Box */
+.chat-input input {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    outline: none;
+    font-size: 14px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+/* Placeholder Color */
+.chat-input input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* Buttons */
+.chat-input button {
+    margin-left: 8px;
+    padding: 12px 15px;
+    background: linear-gradient(135deg, #764ba2, #667eea);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.3s ease;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.chat-input button:hover {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    transform: scale(1.1);
+}
+
+/* Voice Button */
+#voice-btn {
+    background: linear-gradient(135deg, #ff758c, #ff7eb3);
+}
+
+#voice-btn:hover {
+    background: linear-gradient(135deg, #ff7eb3, #ff758c);
+}
+
+</style>
+<script>
+document.getElementById("send-btn").addEventListener("click", sendMessage);
+document.getElementById("voice-btn").addEventListener("click", startVoiceRecognition);
+
+let recognition;
+function startVoiceRecognition() {
+    if (!recognition) {
+        recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        recognition.onresult = function(event) {
+            let spokenText = event.results[0][0].transcript;
+            document.getElementById("user-input").value = spokenText;
+            sendMessage();
+        };
+        recognition.onerror = function(event) {
+            console.error("Speech recognition error:", event.error);
+        };
+    }
+    recognition.start();
+}
+
+function sendMessage() {
+    let userInput = document.getElementById("user-input").value.trim();
+    if (userInput === "") return;
+
+    displayMessage("You", userInput, "user-message");
+    document.getElementById("user-input").value = "";
+    
+    setTimeout(() => chatbotReply(userInput), 1000);
+}
+
+function chatbotReply(input) {
+    let responses = {
+        "hi": "Hello! How can I help you?",
+        "how are you": "I'm just a chatbot, but I'm doing great! 😊",
+        "your name": "I'm your AI Chatbot!",
+        "bye": "Goodbye! Have a nice day!",
+        "tell me a joke": "Why don’t programmers like nature? It has too many bugs!"
+    };
+    let reply = responses[input.toLowerCase()] || "Sorry, I didn't understand that.";
+    displayMessage("Bot", reply, "bot-message");
+}
+
+function displayMessage(sender, text, className) {
+    let chatBox = document.getElementById("chat-box");
+    let messageDiv = document.createElement("div");
+    messageDiv.textContent = `${sender}: ${text}`;
+    messageDiv.classList.add(className);
+    chatBox.appendChild(messageDiv);
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+</script>
