@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Web Assignments</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #d63384; /* Vibrant Pink */
+            --secondary-color: #9d4edd; /* Deep Purple */
+            --accent-color: #e03e96; /* Bright Pink */
+            --dark-color: #1a1a2e; /* Dark Blue */
+            --light-color: #f8f9fa; /* Light Background */
+            --success-color: #c77dff; /* Soft Purple */
+            --warning-color: #ff006e; /* Neon Pink */
+            --border-radius: 12px;
+            --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, var(--dark-color) 0%, #16213e 100%);
+            color: var(--light-color);
+            min-height: 100vh;
+            padding: 40px 20px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--light-color);
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        li {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        li::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--primary-color), var(--secondary-color));
+            transition: var(--transition);
+        }
+
+        li:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        li:hover::before {
+            width: 8px;
+        }
+
+        a {
+            text-decoration: none;
+            color: white;
+            font-weight: 500;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            transition: var(--transition);
+            position: relative;
+            z-index: 1;
+            padding-left: 15px;
+        }
+
+        a:hover {
+            color: var(--accent-color);
+            transform: translateX(5px);
+        }
+
+        a::before {
+            content: '→';
+            margin-right: 10px;
+            color: var(--accent-color);
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        a:hover::before {
+            opacity: 1;
+            margin-right: 15px;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 20px 10px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            li {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>My Lab Assignment Projects</h1>
+    <ul>
+        <li><a href="C:\Users\suhan\Downloads\EXERCISE1 FINAL (3).pdf">Exercise1</a></li>
+        <li><a href="C:\Users\suhan\Downloads\EXERCISE2 FINAL (2).pdf">Exercise 2</a></li>
+        <li><a href="C:\Users\suhan\Downloads\EXCERCISE 3 (4).pdf">Exercise 3</a></li>
+        <li><a href="C:\Users\suhan\Downloads\Exercise4 (3).pdf">Exercise 4</a></li>
+        <li><a href="C:\Users\suhan\Downloads\Javascript project EX5 (3).pdf">Exercise 5</a></li>
+        <li><a href="C:\Users\suhan\Downloads\ex 7 (2).pdf">Exercise 6</a></li>
+    </ul>
+</body>
+</html>
